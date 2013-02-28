@@ -49,7 +49,6 @@
 
 - (IBAction)reset:(id)sender {
     [[ZGCountDownTimer sharedTimer] resetCountDown];
-    self.atitle.text = [[ZGCountDownTimer sharedTimer] getDateStringForTimeInterval:kDefaultCountDownTime];
 }
 
 - (void)didReceiveMemoryWarning

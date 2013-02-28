@@ -133,14 +133,18 @@ static ZGCountDownTimer *_sharedTimer;
 }
 
 - (BOOL )startCountDown{
-    if (self.totalCountDownTime > self.timePassed && !self.countDownRuning) {
-        self.countDownCompleteDate = [NSDate dateWithTimeInterval:(self.totalCountDownTime - self.timePassed) sinceDate:[NSDate date]];
-        self.countDownRuning = YES;
-        [self backUpMySelf];
-        return YES;
+    if (!self.countDownRuning) {
+        if (self.totalCountDownTime > self.timePassed) {
+            self.countDownCompleteDate = [NSDate dateWithTimeInterval:(self.totalCountDownTime - self.timePassed) sinceDate:[NSDate date]];
+            self.countDownRuning = YES;
+            [self backUpMySelf];
+            return YES;
+        } else {
+            [self.delegate countDownCompleted:self];
+            [self removeSelfBackup];
+            return NO;
+        }
     } else {
-        [self.delegate countDownCompleted:self];
-        [self removeSelfBackup];
         return NO;
     }
 }
@@ -156,8 +160,8 @@ static ZGCountDownTimer *_sharedTimer;
 }
 
 - (void)resetCountDown{
-    [self pauseCountDown];
     self.timePassed = 0;
+    self.countDownRuning = NO;
     [self removeSelfBackup];
 }
 
