@@ -83,7 +83,6 @@ static ZGCountDownTimer *_sharedTimer;
         self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
         [self.defaultTimer fire];
         [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
-        NSLog(@"Timer fired");
     }
     
     if (!countDownRuning) {
@@ -197,7 +196,6 @@ static ZGCountDownTimer *_sharedTimer;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[self countDownInfoForBackup] forKey:kZGCountDownUserDefaultKey];
     [defaults synchronize];
-    NSLog(@"BackUp: %@", [self countDownInfoForBackup]);
 }
 
 - (void)removeSelfBackup{
@@ -209,7 +207,6 @@ static ZGCountDownTimer *_sharedTimer;
 - (void)restoreMySelf{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [self restoreWithCountDownBackup:[defaults objectForKey:kZGCountDownUserDefaultKey]];
-    NSLog(@"Restore: %@", [defaults objectForKey:kZGCountDownUserDefaultKey]);
 }
 
 
