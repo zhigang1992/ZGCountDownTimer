@@ -18,6 +18,7 @@
 		0431703816DF42AA00957BB0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0431703716DF42AA00957BB0 /* Default-568h@2x.png */; };
 		0431703B16DF42AA00957BB0 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0431703916DF42AA00957BB0 /* MainStoryboard.storyboard */; };
 		0431703E16DF42AA00957BB0 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0431703D16DF42AA00957BB0 /* ViewController.m */; };
+		0431704616DF42D300957BB0 /* ZGCountDownTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0431704516DF42D300957BB0 /* ZGCountDownTimer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,8 @@
 		0431703A16DF42AA00957BB0 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		0431703C16DF42AA00957BB0 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		0431703D16DF42AA00957BB0 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		0431704416DF42D300957BB0 /* ZGCountDownTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZGCountDownTimer.h; path = Class/ZGCountDownTimer.h; sourceTree = SOURCE_ROOT; };
+		0431704516DF42D300957BB0 /* ZGCountDownTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZGCountDownTimer.m; path = Class/ZGCountDownTimer.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +59,8 @@
 		0431701516DF42A900957BB0 = {
 			isa = PBXGroup;
 			children = (
+				0431704416DF42D300957BB0 /* ZGCountDownTimer.h */,
+				0431704516DF42D300957BB0 /* ZGCountDownTimer.m */,
 				0431702716DF42AA00957BB0 /* ZGCountDownTimer */,
 				0431702016DF42AA00957BB0 /* Frameworks */,
 				0431701F16DF42AA00957BB0 /* Products */,
@@ -176,6 +181,7 @@
 				0431702E16DF42AA00957BB0 /* main.m in Sources */,
 				0431703216DF42AA00957BB0 /* AppDelegate.m in Sources */,
 				0431703E16DF42AA00957BB0 /* ViewController.m in Sources */,
+				0431704616DF42D300957BB0 /* ZGCountDownTimer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
