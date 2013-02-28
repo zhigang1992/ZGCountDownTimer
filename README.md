@@ -44,7 +44,7 @@ Enjoy.
 [Email](zhigang1992@gmail.com)    
 [AppNet](https://alpha.app.net/zhigang1992)    
 
-###LISCEN (MIT)
+###LICENSE (MIT)
 
 Copyright (C) 2012 by Kyle Fang
 
