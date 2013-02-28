@@ -27,6 +27,16 @@
 
 @implementation ZGCountDownTimer
 
+static ZGCountDownTimer *_sharedTimer;
+
++ (ZGCountDownTimer *)sharedTimer{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _sharedTimer = [[self alloc] init];
+    });
+    return _sharedTimer;
+}
+
 - (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *))restoreFromBackup{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSDictionary *timerInfo = [defaults objectForKey:kZGCountDownUserDefaultKey];
@@ -70,6 +80,7 @@
 - (void)setCountDownRuning:(BOOL)countDownRuning{
     
     _countDownRuning = countDownRuning;
+    
     if (!self.defaultTimer && countDownRuning) {
         self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
         [self.defaultTimer fire];

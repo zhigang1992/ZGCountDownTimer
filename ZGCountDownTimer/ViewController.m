@@ -14,7 +14,6 @@
 
 @interface ViewController () <ZGCountDownTimerDelegate>
 @property (weak, nonatomic) IBOutlet UILabel *atitle;
-@property (nonatomic) ZGCountDownTimer *timer;
 @end
 
 @implementation ViewController
@@ -24,10 +23,9 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 
-    self.timer = [[ZGCountDownTimer alloc] init];
-    self.timer.delegate = self;
-    [self.timer setupCountDownForTheFirstTime:^(ZGCountDownTimer *timer) {
-        self.timer.totalCountDownTime = kDefaultCountDownTime;
+    [ZGCountDownTimer sharedTimer].delegate = self;
+    [[ZGCountDownTimer sharedTimer] setupCountDownForTheFirstTime:^(ZGCountDownTimer *timer) {
+        timer.totalCountDownTime = kDefaultCountDownTime;
     } restoreFromBackUp:nil];    
 }
 
@@ -36,22 +34,22 @@
 }
 
 - (void)countDownCompleted:(ZGCountDownTimer *)sender{
-    self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
+    self.atitle.text = [[ZGCountDownTimer sharedTimer] getDateStringForTimeInterval:kDefaultCountDownTime];
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Completed" message:@"Completed!" delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil];
     [alertView show];
 }
 
 - (IBAction)start:(id)sender {
-    [self.timer startCountDown];
+    [[ZGCountDownTimer sharedTimer] startCountDown];
 }
 
 - (IBAction)pause:(id)sender {
-    [self.timer pauseCountDown];
+    [[ZGCountDownTimer sharedTimer] pauseCountDown];
 }
 
 - (IBAction)reset:(id)sender {
-    [self.timer resetCountDown];
-    self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
+    [[ZGCountDownTimer sharedTimer] resetCountDown];
+    self.atitle.text = [[ZGCountDownTimer sharedTimer] getDateStringForTimeInterval:kDefaultCountDownTime];
 }
 
 - (void)didReceiveMemoryWarning
