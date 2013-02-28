@@ -47,6 +47,18 @@
     return self.timePassed>0;
 }
 
+- (void)setCountDownRuning:(BOOL)countDownRuning{
+    if (countDownRuning != _countDownRuning) {
+        _countDownRuning = countDownRuning;
+        if (!self.defaultTimer && countDownRuning) {
+            self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
+            [self.defaultTimer fire];
+            [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
+            NSLog(@"Timer fired");
+        }
+    }
+}
+
 - (void)timerUpdated:(NSTimer *)timer{
     NSLog(@"update");
     if (self.countDownRuning) {
@@ -60,12 +72,12 @@
             if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
                 [self.delegate secondUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
             }
-            if ((int)round(self.timePassed)%60 == 0 || newTimePassed-self.timePassed > 60) {
+            if ((int)round(newTimePassed)%60 == 0 || newTimePassed-self.timePassed > 60) {
                 if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
                     [self.delegate minutesUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
                 }
             }
-            if ((int)round(self.timePassed)%(60*60) == 0 || newTimePassed - self.timePassed > 60*60) {
+            if ((int)round(newTimePassed)%(60*60) == 0 || newTimePassed - self.timePassed > 60*60) {
                 if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
                     [self.delegate hoursUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
                 }
@@ -79,12 +91,6 @@
     if (self.totalCountDownTime > self.timePassed && !self.countDownRuning) {
         self.countDownCompleteDate = [NSDate dateWithTimeInterval:(self.totalCountDownTime - self.timePassed) sinceDate:[NSDate date]];
         self.countDownRuning = YES;
-        if (!self.defaultTimer) {
-            self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
-            [self.defaultTimer fire];
-            [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
-            NSLog(@"Timer fired");
-        }
         return YES;
     } else {
         return NO;
@@ -147,10 +153,7 @@
     self.totalCountDownTime = [[countDownInfo valueForKey:kZGCountDownTotalTimeKey] doubleValue];
     self.timePassed = [[countDownInfo valueForKey:kZGCountDownTimerTimePassedKey] doubleValue];
     self.countDownCompleteDate = [countDownInfo valueForKey:kZGCountDownTimerCompleteDateKey];
-    BOOL isRunning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
-    if (isRunning) {
-        [self startCountDown];
-    }
+    self.countDownRuning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
 }
 
 
