@@ -26,6 +26,8 @@
 
 @interface ZGCountDownTimer : NSObject
 
+- (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *timer))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *timer))restoreFromBackup;
+
 @property (nonatomic) NSTimeInterval totalCountDownTime;
 
 @property (nonatomic, readonly) BOOL isRunning;

@@ -19,32 +19,16 @@
 
 @implementation ViewController
 
-- (ZGCountDownTimer *)timer{
-    if (!_timer) {
-        _timer = [[ZGCountDownTimer alloc] init];
-        self.timer.delegate = self;
-    }
-    return _timer;
-}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *timerInfo = [defaults objectForKey:@"TimerBackUp"];
-    if (timerInfo) {
-        [self.timer restoreWithCountDownBackup:timerInfo];
-    } else {
-        self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
+    self.timer = [[ZGCountDownTimer alloc] init];
+    self.timer.delegate = self;
+    [self.timer setupCountDownForTheFirstTime:^(ZGCountDownTimer *timer) {
         self.timer.totalCountDownTime = kDefaultCountDownTime;
-    }
-}
-
-- (void)viewWillAppear:(BOOL)animated{
-    [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appQuitting) name:@"MayDay_AppIsQuitting_ThisIsAppDelegate_Copy?" object:nil];
+    } restoreFromBackUp:nil];    
 }
 
 - (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime{
@@ -52,25 +36,9 @@
 }
 
 - (void)countDownCompleted:(ZGCountDownTimer *)sender{
-    [self removeTimerBackup];
     self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Completed" message:@"Completed!" delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil];
     [alertView show];
-}
-
-- (void)removeTimerBackup{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:nil forKey:@"TimerBackUp"];
-    [defaults synchronize];
-}
-
-- (void)appQuitting{
-    NSLog(@"BackUp");
-    if ([self.timer isRunning] || [self.timer started]) {
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        [defaults setObject:[self.timer countDownInfoForBackup] forKey:@"TimerBackUp"];
-        [defaults synchronize];
-    }
 }
 
 - (IBAction)start:(id)sender {
@@ -83,7 +51,6 @@
 
 - (IBAction)reset:(id)sender {
     [self.timer resetCountDown];
-    [self removeTimerBackup];
     self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
 }
 
