@@ -28,7 +28,6 @@
     if (self) {
         self.timePassed = 0;
         self.totalCountDownTime = 0;
-        self.countDownRuning = NO;
     }
     return self;
 }
@@ -48,15 +47,28 @@
 }
 
 - (void)setCountDownRuning:(BOOL)countDownRuning{
-    if (countDownRuning != _countDownRuning) {
-        _countDownRuning = countDownRuning;
-        if (!self.defaultTimer && countDownRuning) {
-            self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
-            [self.defaultTimer fire];
-            [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
-            NSLog(@"Timer fired");
+
+    _countDownRuning = countDownRuning;
+    if (!self.defaultTimer && countDownRuning) {
+        self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
+        [self.defaultTimer fire];
+        [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
+        NSLog(@"Timer fired");
+    }
+    if (!countDownRuning) {
+        if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
+            [self.delegate secondUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+        }
+        
+        if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
+            [self.delegate minutesUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+        }
+        
+        if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
+            [self.delegate hoursUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
         }
     }
+
 }
 
 - (void)timerUpdated:(NSTimer *)timer{
@@ -155,7 +167,6 @@
     self.countDownCompleteDate = [countDownInfo valueForKey:kZGCountDownTimerCompleteDateKey];
     self.countDownRuning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
 }
-
 
 - (void)dealloc{
     [self.defaultTimer invalidate];
