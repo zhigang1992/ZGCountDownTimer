@@ -4,7 +4,7 @@ ZGCountDownTimer
  Background Proof, Termination Proof Timer, Reboot Proof Timer.
 
 
-[ZGCountDownTimer][] is a `NSObject` Class that powered by `NSTimer` to work as a full CountDown Timer.
+[ZGCountDownTimer][] is powered by `NSTimer` to work as a full CountDown Timer.
 
 The best thing about [ZGCountDownTimer][] is that it work acrross **Background App**, **Background Termination** and even **Device Rebbot**.
 
