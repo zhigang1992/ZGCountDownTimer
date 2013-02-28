@@ -32,12 +32,6 @@
     return self;
 }
 
-- (NSTimer *)defaultTimer{
-    if (!_defaultTimer) {
-    }
-    return _defaultTimer;
-}
-
 - (BOOL)isRunning{
     return self.countDownRuning;
 }
@@ -47,7 +41,7 @@
 }
 
 - (void)setCountDownRuning:(BOOL)countDownRuning{
-
+    
     _countDownRuning = countDownRuning;
     if (!self.defaultTimer && countDownRuning) {
         self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
@@ -68,13 +62,14 @@
             [self.delegate hoursUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
         }
     }
-
+    
 }
 
 - (void)timerUpdated:(NSTimer *)timer{
     NSLog(@"update");
     if (self.countDownRuning) {
-        if ([self.countDownCompleteDate timeIntervalSinceNow]<0) {
+        if ([self.countDownCompleteDate timeIntervalSinceNow]<=0) {
+            self.timePassed = MAX(0, round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]));
             if ([self.delegate respondsToSelector:@selector(countDownCompleted:)]) {
                 [self.delegate countDownCompleted:self];
             }
@@ -111,7 +106,7 @@
 }
 
 - (BOOL )pauseCountDown{
-    if (self.totalCountDownTime > self.timePassed && self.countDownRuning) {
+    if (self.countDownRuning) {
         self.countDownRuning = NO;
         return YES;
     } else {
