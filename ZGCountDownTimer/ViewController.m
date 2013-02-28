@@ -26,7 +26,7 @@
     [ZGCountDownTimer sharedTimer].delegate = self;
     [[ZGCountDownTimer sharedTimer] setupCountDownForTheFirstTime:^(ZGCountDownTimer *timer) {
         timer.totalCountDownTime = kDefaultCountDownTime;
-    } restoreFromBackUp:nil];    
+    } restoreFromBackUp:nil];
 }
 
 - (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime{
@@ -34,7 +34,6 @@
 }
 
 - (void)countDownCompleted:(ZGCountDownTimer *)sender{
-    self.atitle.text = [[ZGCountDownTimer sharedTimer] getDateStringForTimeInterval:kDefaultCountDownTime];
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Completed" message:@"Completed!" delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil];
     [alertView show];
 }

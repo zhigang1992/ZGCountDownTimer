@@ -15,8 +15,6 @@
 
 #define kZGCountDownUserDefaultKey          @"ZGCountDownUserDefaults"
 
-
-
 @interface ZGCountDownTimer()
 
 @property (nonatomic) NSTimer *defaultTimer;

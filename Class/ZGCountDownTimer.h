@@ -15,6 +15,7 @@
 
 
 @optional
+
 - (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval )timePassed ofTotalTime:(NSTimeInterval )totalTime;
 - (void)minutesUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval )timePassed ofTotalTime:(NSTimeInterval )totalTime;
 - (void)hoursUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval )timePassed ofTotalTime:(NSTimeInterval )totalTime;
@@ -32,20 +33,15 @@
 
 @property (nonatomic) NSTimeInterval totalCountDownTime;
 
-@property (nonatomic, readonly) BOOL isRunning;
-@property (nonatomic, readonly) BOOL started;
-
 - (BOOL )startCountDown;
 - (BOOL )pauseCountDown;
 - (void)resetCountDown;
 
+@property (nonatomic, readonly) BOOL isRunning;
+@property (nonatomic, readonly) BOOL started;
 
 - (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval;
 - (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)dateFormatter;
-
-
-- (NSDictionary *)countDownInfoForBackup;
-- (void)restoreWithCountDownBackup:(NSDictionary *)countDownInfo;
 
 
 @property (nonatomic) id <ZGCountDownTimerDelegate> delegate;
