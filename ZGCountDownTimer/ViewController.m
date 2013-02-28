@@ -10,7 +10,7 @@
 #import "ZGCountDownTimer.h"
 
 
-#define kDefaultCountDownTime 60*60*1
+#define kDefaultCountDownTime 10
 
 @interface ViewController () <ZGCountDownTimerDelegate>
 @property (weak, nonatomic) IBOutlet UILabel *atitle;
@@ -47,19 +47,22 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appQuitting) name:@"MayDay_AppIsQuitting_ThisIsAppDelegate_Copy?" object:nil];
 }
 
-
-
 - (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime{
     self.atitle.text = [sender getDateStringForTimeInterval:(totalTime - timePassed)];
 }
 
 - (void)countDownCompleted:(ZGCountDownTimer *)sender{
+    [self removeTimerBackup];
+    self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Completed" message:@"Completed!" delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil];
+    [alertView show];
+}
+
+- (void)removeTimerBackup{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:nil forKey:@"TimerBackUp"];
     [defaults synchronize];
 }
-
-
 
 - (void)appQuitting{
     NSLog(@"BackUp");
@@ -80,6 +83,7 @@
 
 - (IBAction)reset:(id)sender {
     [self.timer resetCountDown];
+    [self removeTimerBackup];
     self.atitle.text = [self.timer getDateStringForTimeInterval:kDefaultCountDownTime];
 }
 

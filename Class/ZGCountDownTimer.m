@@ -93,6 +93,7 @@
         self.countDownRuning = YES;
         return YES;
     } else {
+        [self.delegate countDownCompleted:self];
         return NO;
     }
 }
@@ -108,7 +109,6 @@
 
 - (void)resetCountDown{
     [self pauseCountDown];
-    [self.delegate countDownCompleted:self];
     self.timePassed = 0;
 }
 
