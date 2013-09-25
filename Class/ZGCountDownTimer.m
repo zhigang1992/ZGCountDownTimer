@@ -13,7 +13,7 @@
 #define kZGCountDownTotalTimeKey            @"countDownTotalTime"
 #define kZGCountDownRunningKey              @"countDownRunning"
 
-#define kZGCountDownUserDefaultKey          @"ZGCountDownUserDefaults"
+static NSString *kZGCountDownUserDefaultKey = @"ZGCountDownUserDefaults";
 
 @interface ZGCountDownTimer()
 
@@ -25,25 +25,35 @@
 
 @implementation ZGCountDownTimer
 
-static ZGCountDownTimer *_sharedTimer;
+static NSDictionary *_countDownTimersWithIdentifier;
 
-+ (ZGCountDownTimer *)sharedTimer{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _sharedTimer = [[self alloc] init];
-    });
-    return _sharedTimer;
++ (ZGCountDownTimer *)countDownTimerWithIdentifier:(NSString *)identifier
+{
+    if (!identifier) {
+        identifier = kZGCountDownUserDefaultKey;
+    }
+    if (_countDownTimersWithIdentifier) {
+        _countDownTimersWithIdentifier = [[NSMutableDictionary alloc] init];
+    }
+    ZGCountDownTimer *timer = [_countDownTimersWithIdentifier objectForKey:identifier];
+    if (!timer) {
+        timer = [[self alloc] init];
+        timer.timerIdentifier = identifier;
+    }
+    return timer;
 }
 
-- (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *))restoreFromBackup{
+- (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *))restoreFromBackup
+{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *timerInfo = [defaults objectForKey:kZGCountDownUserDefaultKey];
+    NSDictionary *timerInfo = [defaults objectForKey:self.timerIdentifier];
     if (timerInfo) {
         [self restoreMySelf];
         if (restoreFromBackup) {
             restoreFromBackup(self);
         }
-    } else {
+    }
+    else {
         self.totalCountDownTime = 0;
         self.timePassed = 0;
         if (firstBlock) {
@@ -52,7 +62,8 @@ static ZGCountDownTimer *_sharedTimer;
     }
 }
 
-- (void)setTotalCountDownTime:(NSTimeInterval)totalCountDownTime{
+- (void)setTotalCountDownTime:(NSTimeInterval)totalCountDownTime
+{
     _totalCountDownTime = totalCountDownTime;
     if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
         [self.delegate secondUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
@@ -67,16 +78,18 @@ static ZGCountDownTimer *_sharedTimer;
     }
 }
 
-- (BOOL)isRunning{
+- (BOOL)isRunning
+{
     return self.countDownRuning;
 }
 
-- (BOOL)started{
-    return self.timePassed>0;
+- (BOOL)started
+{
+    return self.timePassed > 0;
 }
 
-- (void)setCountDownRuning:(BOOL)countDownRuning{
-    
+- (void)setCountDownRuning:(BOOL)countDownRuning
+{
     _countDownRuning = countDownRuning;
     
     if (!self.defaultTimer && countDownRuning) {
@@ -101,7 +114,8 @@ static ZGCountDownTimer *_sharedTimer;
     
 }
 
-- (void)timerUpdated:(NSTimer *)timer{
+- (void)timerUpdated:(NSTimer *)timer
+{
     if (self.countDownRuning) {
         if ([self.countDownCompleteDate timeIntervalSinceNow]<=0) {
             self.timePassed = MAX(0, round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]));
@@ -109,7 +123,8 @@ static ZGCountDownTimer *_sharedTimer;
                 [self.delegate countDownCompleted:self];
             }
             [self resetCountDown];
-        } else {
+        }
+        else {
             NSTimeInterval newTimePassed = round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]);
             if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
                 [self.delegate secondUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
@@ -129,44 +144,93 @@ static ZGCountDownTimer *_sharedTimer;
     }
 }
 
-- (BOOL )startCountDown{
+- (BOOL )startCountDown
+{
     if (!self.countDownRuning) {
         if (self.totalCountDownTime > self.timePassed) {
             self.countDownCompleteDate = [NSDate dateWithTimeInterval:(self.totalCountDownTime - self.timePassed) sinceDate:[NSDate date]];
             self.countDownRuning = YES;
             [self backUpMySelf];
             return YES;
-        } else {
+        }
+        else {
             [self.delegate countDownCompleted:self];
             [self removeSelfBackup];
             return NO;
         }
-    } else {
+    }
+    else {
         return NO;
     }
 }
 
-- (BOOL )pauseCountDown{
+- (BOOL )pauseCountDown
+{
     if (self.countDownRuning) {
         self.countDownRuning = NO;
         [self backUpMySelf];
         return YES;
-    } else {
+    }
+    else {
         return NO;
     }
 }
 
-- (void)resetCountDown{
+- (void)resetCountDown
+{
     self.timePassed = 0;
     self.countDownRuning = NO;
     [self removeSelfBackup];
 }
 
-- (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval{
+- (void)backUpMySelf
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[self countDownInfoForBackup] forKey:self.timerIdentifier];
+    [defaults synchronize];
+}
+
+- (void)removeSelfBackup
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:nil forKey:self.timerIdentifier];
+    [defaults synchronize];
+}
+
+- (void)restoreMySelf
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [self restoreWithCountDownBackup:[defaults objectForKey:self.timerIdentifier]];
+}
+
+- (NSDictionary *)countDownInfoForBackup
+{
+    return @{kZGCountDownTimerCompleteDateKey: self.countDownCompleteDate,
+             kZGCountDownTimerTimePassedKey: [NSNumber numberWithDouble:self.timePassed],
+             kZGCountDownTotalTimeKey: [NSNumber numberWithDouble:self.totalCountDownTime],
+             kZGCountDownRunningKey: [NSNumber numberWithBool:self.countDownRuning]};
+}
+
+- (void)restoreWithCountDownBackup:(NSDictionary *)countDownInfo
+{
+    self.totalCountDownTime = [[countDownInfo valueForKey:kZGCountDownTotalTimeKey] doubleValue];
+    self.timePassed = [[countDownInfo valueForKey:kZGCountDownTimerTimePassedKey] doubleValue];
+    self.countDownCompleteDate = [countDownInfo valueForKey:kZGCountDownTimerCompleteDateKey];
+    self.countDownRuning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
+}
+
+- (void)dealloc
+{
+    [self.defaultTimer invalidate];
+}
+
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval
+{
     return [self getDateStringForTimeInterval:timeInterval withDateFormatter:nil];
 }
 
-- (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)formatter{
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)formatter
+{
     double hours;
     double minutes;
     double seconds = round(timeInterval);
@@ -190,43 +254,6 @@ static ZGCountDownTimer *_sharedTimer;
     } else {
         return [NSString stringWithFormat:NSLocalizedString(@"%.0f:%02.0f:%@", @"Short format for elapsed time (hour:minute:second). Example: 1:05:3.4"), hours, minutes, secondsInString];
     }
-}
-
-- (void)backUpMySelf{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[self countDownInfoForBackup] forKey:kZGCountDownUserDefaultKey];
-    [defaults synchronize];
-}
-
-- (void)removeSelfBackup{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:nil forKey:kZGCountDownUserDefaultKey];
-    [defaults synchronize];
-}
-
-- (void)restoreMySelf{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [self restoreWithCountDownBackup:[defaults objectForKey:kZGCountDownUserDefaultKey]];
-}
-
-
-
-- (NSDictionary *)countDownInfoForBackup{
-    return @{kZGCountDownTimerCompleteDateKey: self.countDownCompleteDate,
-             kZGCountDownTimerTimePassedKey: [NSNumber numberWithDouble:self.timePassed],
-             kZGCountDownTotalTimeKey: [NSNumber numberWithDouble:self.totalCountDownTime],
-             kZGCountDownRunningKey: [NSNumber numberWithBool:self.countDownRuning]};
-}
-
-- (void)restoreWithCountDownBackup:(NSDictionary *)countDownInfo{
-    self.totalCountDownTime = [[countDownInfo valueForKey:kZGCountDownTotalTimeKey] doubleValue];
-    self.timePassed = [[countDownInfo valueForKey:kZGCountDownTimerTimePassedKey] doubleValue];
-    self.countDownCompleteDate = [countDownInfo valueForKey:kZGCountDownTimerCompleteDateKey];
-    self.countDownRuning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
-}
-
-- (void)dealloc{
-    [self.defaultTimer invalidate];
 }
 
 @end

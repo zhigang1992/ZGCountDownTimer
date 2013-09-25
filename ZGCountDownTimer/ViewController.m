@@ -14,6 +14,7 @@
 
 @interface ViewController () <ZGCountDownTimerDelegate>
 @property (weak, nonatomic) IBOutlet UILabel *atitle;
+@property (nonatomic, strong) ZGCountDownTimer *myCountDownTimer;
 @end
 
 @implementation ViewController
@@ -23,31 +24,38 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
 
-    [ZGCountDownTimer sharedTimer].delegate = self;
-    [[ZGCountDownTimer sharedTimer] setupCountDownForTheFirstTime:^(ZGCountDownTimer *timer) {
+    self.myCountDownTimer = [ZGCountDownTimer countDownTimerWithIdentifier:self.tabBarItem.title];
+    
+    self.myCountDownTimer.delegate = self;
+    [self.myCountDownTimer setupCountDownForTheFirstTime:^(ZGCountDownTimer *timer) {
         timer.totalCountDownTime = kDefaultCountDownTime;
     } restoreFromBackUp:nil];
 }
 
-- (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime{
-    self.atitle.text = [sender getDateStringForTimeInterval:(totalTime - timePassed)];
+- (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime
+{
+    self.atitle.text = [ZGCountDownTimer getDateStringForTimeInterval:(totalTime - timePassed)];
 }
 
-- (void)countDownCompleted:(ZGCountDownTimer *)sender{
+- (void)countDownCompleted:(ZGCountDownTimer *)sender
+{
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Completed" message:@"Completed!" delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles:nil];
     [alertView show];
 }
 
-- (IBAction)start:(id)sender {
-    [[ZGCountDownTimer sharedTimer] startCountDown];
+- (IBAction)start:(id)sender
+{
+    [self.myCountDownTimer startCountDown];
 }
 
-- (IBAction)pause:(id)sender {
-    [[ZGCountDownTimer sharedTimer] pauseCountDown];
+- (IBAction)pause:(id)sender
+{
+    [self.myCountDownTimer pauseCountDown];
 }
 
-- (IBAction)reset:(id)sender {
-    [[ZGCountDownTimer sharedTimer] resetCountDown];
+- (IBAction)reset:(id)sender
+{
+    [self.myCountDownTimer resetCountDown];
 }
 
 - (void)didReceiveMemoryWarning
