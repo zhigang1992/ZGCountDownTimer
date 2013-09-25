@@ -43,4 +43,16 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+    NSString *timerIdentifier = [notification.userInfo valueForKey:@"countDownNotificationKey"];
+    UITabBarController *tabBarVC = (UITabBarController *)self.window.rootViewController;
+    for (UIViewController *vc in tabBarVC.viewControllers) {
+        if ([vc.tabBarItem.title isEqualToString:timerIdentifier]) {
+            [tabBarVC setSelectedViewController:vc];
+            break;
+        }
+    }
+}
+
 @end

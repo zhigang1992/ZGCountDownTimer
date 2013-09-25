@@ -52,6 +52,9 @@
 /** totalCountDownTime, should only set it in firstBlock */
 @property (nonatomic) NSTimeInterval totalCountDownTime;
 
+/** timePassed, it's read only in seconds*/
+@property (nonatomic, readonly) NSTimeInterval timePassed;
+
 /** start timer
  @return success in starting timer, if timer completed or already started will return NO;
  */
