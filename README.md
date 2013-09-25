@@ -12,9 +12,13 @@ The best thing about [ZGCountDownTimer][] is that it work acrross **Background A
 ###Usage
 
 If you want it to work across **Background App**, **Background Termination** and even **Device Rebbot**.
-You need to implement the method:
+You need to call these two method:
 
 ```
+// To get a timer.
++ (ZGCountDownTimer *)countDownTimerWithIdentifier:(NSString *)identifier;
+
+// Start using the timer.
 - (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *timer))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *timer))restoreFromBackup;
 ```
 
@@ -24,18 +28,19 @@ else it would be just a regular stopWatch the only work across **Background App*
 Control the CountDown timer is as easy as it say:
 
 ```
-- (BOOL )startCountDown;
-- (BOOL )pauseCountDown;
+- (BOOL)startCountDown;
+- (BOOL)pauseCountDown;
 - (void)resetCountDown;
 ```
 
 Also, there is two help method to help you get the awesome `NSString` with or without customize `NSNumberFormatter`.
 
 ```
-- (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval;
-- (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)dateFormatter;
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval;
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)dateFormatter;
 ```
 
+For more detail please see the damo app, or read the docs in the .h file.    
 Enjoy.
 
 ###Contact
