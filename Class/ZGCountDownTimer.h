@@ -81,7 +81,12 @@
 @property (nonatomic, weak) id <ZGCountDownTimerDelegate> delegate;
 
 
-
+/** help method
+ 
+ @param timeInterval    remain countDownTime in secound.
+ @param dateFormatter   custom dateFormatter.
+ @return a string value to represent the countDownTime.
+ */
 + (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval;
 + (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)dateFormatter;
 @end

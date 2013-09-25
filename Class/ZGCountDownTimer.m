@@ -13,7 +13,7 @@
 #define kZGCountDownTotalTimeKey            @"countDownTotalTime"
 #define kZGCountDownRunningKey              @"countDownRunning"
 
-static NSString *kZGCountDownUserDefaultKey = @"ZGCountDownUserDefaults";
+#define kZGCountDownUserDefaultKey          @"ZGCountDownUserDefaults"
 
 @interface ZGCountDownTimer()
 
