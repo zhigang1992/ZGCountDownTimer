@@ -25,7 +25,7 @@
 
 @implementation ZGCountDownTimer
 
-static NSDictionary *_countDownTimersWithIdentifier;
+static NSMutableDictionary *_countDownTimersWithIdentifier;
 
 + (ZGCountDownTimer *)countDownTimerWithIdentifier:(NSString *)identifier
 {
@@ -39,6 +39,7 @@ static NSDictionary *_countDownTimersWithIdentifier;
     if (!timer) {
         timer = [[self alloc] init];
         timer.timerIdentifier = identifier;
+        [_countDownTimersWithIdentifier setObject:timer forKey:identifier];
     }
     return timer;
 }
