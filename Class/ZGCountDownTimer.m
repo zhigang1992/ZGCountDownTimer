@@ -15,20 +15,24 @@
 
 #define kZGCountDownUserDefaultKey          @"ZGCountDownUserDefaults"
 
-@interface ZGCountDownTimer()
+@interface ZGCountDownTimer ()
 
-@property (nonatomic) NSTimer *defaultTimer;
-@property (nonatomic) NSTimeInterval timePassed;
-@property (nonatomic) BOOL countDownRuning;
-@property (nonatomic) NSDate *countDownCompleteDate;
+@property(nonatomic) NSTimer *defaultTimer;
+@property(nonatomic) NSTimeInterval timePassed;
+@property(nonatomic) BOOL countDownRunning;
+@property(nonatomic) NSDate *countDownCompleteDate;
 @end
 
 @implementation ZGCountDownTimer
 
+#pragma mark - init methods
 static NSMutableDictionary *_countDownTimersWithIdentifier;
 
-+ (ZGCountDownTimer *)countDownTimerWithIdentifier:(NSString *)identifier
-{
++ (ZGCountDownTimer *)defaultCountDownTimer {
+    return [self countDownTimerWithIdentifier:kZGCountDownUserDefaultKey];
+}
+
++ (ZGCountDownTimer *)countDownTimerWithIdentifier:(NSString *)identifier {
     if (!identifier) {
         identifier = kZGCountDownUserDefaultKey;
     }
@@ -44,11 +48,12 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
     return timer;
 }
 
-- (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *))restoreFromBackup
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSDictionary *timerInfo = [defaults objectForKey:self.timerIdentifier];
-    if (timerInfo) {
+#pragma mark - setup methods
+
+- (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *))firstBlock
+                    restoreFromBackUp:(void (^)(ZGCountDownTimer *))restoreFromBackup {
+
+    if ([self backupExist]) {
         [self restoreMySelf];
         if (restoreFromBackup) {
             restoreFromBackup(self);
@@ -63,112 +68,55 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
     }
 }
 
-- (void)setTotalCountDownTime:(NSTimeInterval)totalCountDownTime
-{
+#pragma setters
+- (void)setTotalCountDownTime:(NSTimeInterval)totalCountDownTime {
     _totalCountDownTime = totalCountDownTime;
-    if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
-        [self.delegate secondUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+    [self notifyDelegate];
+}
+
+- (void)setCountDownRunning:(BOOL)countDownRunning {
+    _countDownRunning = countDownRunning;
+
+    if (!self.defaultTimer && countDownRunning) {
+        [self setupDefaultTimer];
+        [self timerUpdated:self.defaultTimer];
     }
-    
-    if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
-        [self.delegate minutesUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
-    }
-    
-    if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
-        [self.delegate hoursUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+
+    if (!countDownRunning) {
+        [self notifyDelegate];
     }
 }
 
-- (BOOL)isRunning
-{
-    return self.countDownRuning;
+
+#pragma mark - timer API
+- (BOOL)isRunning {
+    return self.countDownRunning;
 }
 
-- (BOOL)started
-{
+- (BOOL)started {
     return self.timePassed > 0;
 }
 
-- (void)setCountDownRuning:(BOOL)countDownRuning
-{
-    _countDownRuning = countDownRuning;
-    
-    if (!self.defaultTimer && countDownRuning) {
-        self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
-        [self.defaultTimer fire];
-        [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
-    }
-    
-    if (!countDownRuning) {
-        if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
-            [self.delegate secondUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
-        }
-        
-        if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
-            [self.delegate minutesUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
-        }
-        
-        if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
-            [self.delegate hoursUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
-        }
-    }
-    
-}
-
-- (void)timerUpdated:(NSTimer *)timer
-{
-    if (self.countDownRuning) {
-        if ([self.countDownCompleteDate timeIntervalSinceNow]<=0) {
-            self.timePassed = MAX(0, round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]));
-            if ([self.delegate respondsToSelector:@selector(countDownCompleted:)]) {
-                [self.delegate countDownCompleted:self];
-            }
-            [self resetCountDown];
-        }
-        else {
-            NSTimeInterval newTimePassed = round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]);
-            if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
-                [self.delegate secondUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
-            }
-            if ((int)round(newTimePassed)%60 == 0 || newTimePassed-self.timePassed > 60) {
-                if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
-                    [self.delegate minutesUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
-                }
-            }
-            if ((int)round(newTimePassed)%(60*60) == 0 || newTimePassed - self.timePassed > 60*60) {
-                if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
-                    [self.delegate hoursUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
-                }
-            }
-            self.timePassed = newTimePassed;
-        }
-    }
-}
-
-- (BOOL )startCountDown
-{
-    if (!self.countDownRuning) {
+- (BOOL)startCountDown {
+    BOOL result = NO;
+    if (!self.countDownRunning) {
         if (self.totalCountDownTime > self.timePassed) {
             self.countDownCompleteDate = [NSDate dateWithTimeInterval:(self.totalCountDownTime - self.timePassed) sinceDate:[NSDate date]];
-            self.countDownRuning = YES;
+            self.countDownRunning = YES;
             [self backUpMySelf];
-            return YES;
+            result = YES;
         }
         else {
             [self.delegate countDownCompleted:self];
-            [self removeSelfBackup];
-            return NO;
+            [self removeBackupOfMyself];
         }
     }
-    else {
-        return NO;
-    }
+    return result;
 }
 
-- (BOOL )pauseCountDown
-{
-    if (self.countDownRuning) {
-        self.countDownRuning = NO;
+- (BOOL)pauseCountDown {
+    if (self.countDownRunning) {
+        self.countDownRunning = NO;
         [self backUpMySelf];
         return YES;
     }
@@ -177,61 +125,119 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
     }
 }
 
-- (void)resetCountDown
-{
+- (void)resetCountDown {
     self.timePassed = 0;
-    self.countDownRuning = NO;
-    [self removeSelfBackup];
+    self.countDownRunning = NO;
+    [self removeBackupOfMyself];
 }
 
-- (void)backUpMySelf
-{
+#pragma mark - timer update method
+- (void)timerUpdated:(NSTimer *)timer {
+    if (self.countDownRunning) {
+        if ([self.countDownCompleteDate timeIntervalSinceNow] <= 0) {
+            self.timePassed = MAX(0, round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]));
+            if ([self.delegate respondsToSelector:@selector(countDownCompleted:)]) {
+                [self.delegate countDownCompleted:self];
+            }
+            [self resetCountDown];
+        }
+        else {
+            NSTimeInterval newTimePassed = round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]);
+            [self notifySpecificDelegateMethods:newTimePassed];
+            self.timePassed = newTimePassed;
+        }
+    }
+}
+
+#pragma mark - helper methods
+
+- (void)setupDefaultTimer {
+    self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
+    [self.defaultTimer fire];
+    [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
+}
+
+- (void)notifyDelegate {
+    if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
+        [self.delegate secondUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+    }
+
+    if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
+        [self.delegate minutesUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+    }
+
+    if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
+        [self.delegate hoursUpdated:self countDownTimePassed:self.timePassed ofTotalTime:self.totalCountDownTime];
+    }
+}
+
+- (void)notifySpecificDelegateMethods:(NSTimeInterval)newTimePassed {
+    if ([self.delegate respondsToSelector:@selector(secondUpdated:countDownTimePassed:ofTotalTime:)]) {
+        [self.delegate secondUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
+    }
+    if ((int) round(newTimePassed) % 60 == 0 || newTimePassed - self.timePassed > 60) {
+        if ([self.delegate respondsToSelector:@selector(minutesUpdated:countDownTimePassed:ofTotalTime:)]) {
+            [self.delegate minutesUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
+        }
+    }
+    if ((int) round(newTimePassed) % (60 * 60) == 0 || newTimePassed - self.timePassed > 60 * 60) {
+        if ([self.delegate respondsToSelector:@selector(hoursUpdated:countDownTimePassed:ofTotalTime:)]) {
+            [self.delegate hoursUpdated:self countDownTimePassed:newTimePassed ofTotalTime:self.totalCountDownTime];
+        }
+    }
+}
+
+#pragma mark - backup/restore methods
+
+- (BOOL)backupExist {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *timerInfo = [defaults objectForKey:self.timerIdentifier];
+    return timerInfo != nil;
+}
+
+- (void)backUpMySelf {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:[self countDownInfoForBackup] forKey:self.timerIdentifier];
     [defaults synchronize];
 }
 
-- (void)removeSelfBackup
-{
+- (void)restoreMySelf {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [self restoreWithCountDownBackup:[defaults objectForKey:self.timerIdentifier]];
+}
+
+- (void)removeBackupOfMyself {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:nil forKey:self.timerIdentifier];
     [defaults synchronize];
 }
 
-- (void)restoreMySelf
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [self restoreWithCountDownBackup:[defaults objectForKey:self.timerIdentifier]];
+- (NSDictionary *)countDownInfoForBackup {
+    return @{kZGCountDownTimerCompleteDateKey : self.countDownCompleteDate,
+            kZGCountDownTimerTimePassedKey : [NSNumber numberWithDouble:self.timePassed],
+            kZGCountDownTotalTimeKey : [NSNumber numberWithDouble:self.totalCountDownTime],
+            kZGCountDownRunningKey : [NSNumber numberWithBool:self.countDownRunning]};
 }
 
-- (NSDictionary *)countDownInfoForBackup
-{
-    return @{kZGCountDownTimerCompleteDateKey: self.countDownCompleteDate,
-             kZGCountDownTimerTimePassedKey: [NSNumber numberWithDouble:self.timePassed],
-             kZGCountDownTotalTimeKey: [NSNumber numberWithDouble:self.totalCountDownTime],
-             kZGCountDownRunningKey: [NSNumber numberWithBool:self.countDownRuning]};
-}
-
-- (void)restoreWithCountDownBackup:(NSDictionary *)countDownInfo
-{
+- (void)restoreWithCountDownBackup:(NSDictionary *)countDownInfo {
     self.totalCountDownTime = [[countDownInfo valueForKey:kZGCountDownTotalTimeKey] doubleValue];
     self.timePassed = [[countDownInfo valueForKey:kZGCountDownTimerTimePassedKey] doubleValue];
     self.countDownCompleteDate = [countDownInfo valueForKey:kZGCountDownTimerCompleteDateKey];
-    self.countDownRuning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
+    self.countDownRunning = [[countDownInfo valueForKey:kZGCountDownRunningKey] boolValue];
 }
 
-- (void)dealloc
-{
+
+#pragma mark - Dealloc
+- (void)dealloc {
     [self.defaultTimer invalidate];
 }
 
-+ (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval
-{
+#pragma mark - helper on time formatter
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval {
     return [self getDateStringForTimeInterval:timeInterval withDateFormatter:nil];
 }
 
-+ (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)formatter
-{
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval withDateFormatter:(NSNumberFormatter *)formatter {
     double hours;
     double minutes;
     double seconds = round(timeInterval);
@@ -239,7 +245,7 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
     seconds -= 3600. * hours;
     minutes = floor(seconds / 60.);
     seconds -= 60. * minutes;
-    
+
     if (!formatter) {
         formatter = [[NSNumberFormatter alloc] init];
         [formatter setFormatterBehavior:NSNumberFormatterBehaviorDefault];
@@ -247,9 +253,9 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
         [formatter setMaximumFractionDigits:1];
         [formatter setPositiveFormat:@"#00"];  // Use @"#00.0" to display milliseconds as decimal value.
     }
-    
+
     NSString *secondsInString = [formatter stringFromNumber:[NSNumber numberWithDouble:seconds]];
-    
+
     if (hours == 0) {
         return [NSString stringWithFormat:NSLocalizedString(@"%02.0f:%@", @"Short format for elapsed time (minute:second). Example: 05:3.4"), minutes, secondsInString];
     } else {

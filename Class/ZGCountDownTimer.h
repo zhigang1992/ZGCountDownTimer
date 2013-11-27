@@ -18,17 +18,28 @@
  
  @param sender      the timer that is sender delegate.
  @param timePassed  the time has passed in seconds.
- @param totoalTime  total time in seconds.
+ @param totalTime  total time in seconds.
  */
-- (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval )timePassed ofTotalTime:(NSTimeInterval )totalTime;
-- (void)minutesUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval )timePassed ofTotalTime:(NSTimeInterval )totalTime;
-- (void)hoursUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval )timePassed ofTotalTime:(NSTimeInterval )totalTime;
+- (void)secondUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime;
+
+- (void)minutesUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime;
+
+- (void)hoursUpdated:(ZGCountDownTimer *)sender countDownTimePassed:(NSTimeInterval)timePassed ofTotalTime:(NSTimeInterval)totalTime;
+
 - (void)countDownCompleted:(ZGCountDownTimer *)sender;
 
 @end
 
 
 @interface ZGCountDownTimer : NSObject
+
+/** get default timer.
+ 
+ @return Default ZGCountDownTimer.
+ */
+
++ (ZGCountDownTimer *)defaultCountDownTimer;
+
 
 /** get timer for object.
  
@@ -39,7 +50,7 @@
 + (ZGCountDownTimer *)countDownTimerWithIdentifier:(NSString *)identifier;
 
 /** timer's unique identifier */
-@property (nonatomic, copy) NSString *timerIdentifier;
+@property(nonatomic, copy) NSString *timerIdentifier;
 
 /** set up timer for the first time or restore it
  
@@ -50,10 +61,10 @@
 - (void)setupCountDownForTheFirstTime:(void (^)(ZGCountDownTimer *timer))firstBlock restoreFromBackUp:(void (^)(ZGCountDownTimer *timer))restoreFromBackup;
 
 /** totalCountDownTime, should only set it in firstBlock */
-@property (nonatomic) NSTimeInterval totalCountDownTime;
+@property(nonatomic) NSTimeInterval totalCountDownTime;
 
 /** timePassed, it's read only in seconds*/
-@property (nonatomic, readonly) NSTimeInterval timePassed;
+@property(nonatomic, readonly) NSTimeInterval timePassed;
 
 /** start timer
  @return success in starting timer, if timer completed or already started will return NO;
@@ -72,13 +83,13 @@
 - (void)resetCountDown;
 
 /** timer is running, it must be started */
-@property (nonatomic, readonly) BOOL isRunning;
+@property(nonatomic, readonly) BOOL isRunning;
 
 /** timer is started, it may not be running, it could be paused. */
-@property (nonatomic, readonly) BOOL started;
+@property(nonatomic, readonly) BOOL started;
 
 /** ZGCountDownTimerDelegate */
-@property (nonatomic, weak) id <ZGCountDownTimerDelegate> delegate;
+@property(nonatomic, weak) id <ZGCountDownTimerDelegate> delegate;
 
 
 /** help method
@@ -87,6 +98,7 @@
  @param dateFormatter   custom dateFormatter.
  @return a string value to represent the countDownTime.
  */
-+ (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval;
-+ (NSString *)getDateStringForTimeInterval:(NSTimeInterval )timeInterval withDateFormatter:(NSNumberFormatter *)dateFormatter;
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval;
+
++ (NSString *)getDateStringForTimeInterval:(NSTimeInterval)timeInterval withDateFormatter:(NSNumberFormatter *)dateFormatter;
 @end
