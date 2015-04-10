@@ -154,7 +154,7 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
 - (void)setupDefaultTimer {
     self.defaultTimer = [NSTimer timerWithTimeInterval:1.f target:self selector:@selector(timerUpdated:) userInfo:nil repeats:YES];
     [self.defaultTimer fire];
-    [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSDefaultRunLoopMode];
+    [[NSRunLoop currentRunLoop] addTimer:self.defaultTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void)notifyDelegate {
