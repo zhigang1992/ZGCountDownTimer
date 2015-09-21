@@ -143,8 +143,8 @@ static NSMutableDictionary *_countDownTimersWithIdentifier;
         }
         else {
             NSTimeInterval newTimePassed = round(self.totalCountDownTime - [self.countDownCompleteDate timeIntervalSinceNow]);
-            [self notifySpecificDelegateMethods:newTimePassed];
             self.timePassed = newTimePassed;
+            [self notifySpecificDelegateMethods:newTimePassed];
         }
     }
 }
